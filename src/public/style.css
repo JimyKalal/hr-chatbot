@@ -1,0 +1,538 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    width: 70vw;
+    height: 90vh;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(60px) scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Header */
+.container::before {
+    content: "🤖 Job Application Assistant";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 18px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    z-index: 10;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Online status indicator */
+.container::after {
+    content: "● Online";
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    color: #48bb78;
+    font-size: 12px;
+    font-weight: 500;
+    z-index: 11;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+#messages {
+    flex: 1;
+    padding: 75px 20px 15px 20px;
+    overflow-y: auto;
+    background: linear-gradient(to bottom, #f8f9fb, #ffffff);
+    scroll-behavior: smooth;
+    position: relative;
+    max-height: calc(90vh - 200px);
+}
+
+#messages::-webkit-scrollbar {
+    width: 8px;
+}
+
+#messages::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+#messages::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, #cbd5e0, #a0aec0);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+#messages::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(45deg, #a0aec0, #718096);
+    background-clip: content-box;
+}
+
+.message-wrapper {
+    display: flex;
+    margin-bottom: 18px;
+    align-items: flex-end;
+    animation: messageSlide 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: bottom;
+}
+
+@keyframes messageSlide {
+    from {
+        transform: translateY(30px) scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.message-wrapper.left {
+    justify-content: flex-start;
+}
+
+.message-wrapper.right {
+    justify-content: flex-end;
+}
+
+.avtar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease;
+}
+
+.avtar:hover {
+    transform: scale(1.1);
+}
+
+.message-wrapper.left .avtar {
+    margin-right: 12px;
+}
+
+.message-wrapper.right .avtar {
+    margin-left: 12px;
+    order: 2;
+}
+
+.message {
+    max-width: 320px;
+    padding: 14px 18px;
+    border-radius: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-wrap: break-word;
+    position: relative;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.message:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.message.bot {
+    background: linear-gradient(135deg, #ffffff, #f8f9fb);
+    color: #2d3748;
+    border: 1px solid #e2e8f0;
+    border-bottom-left-radius: 8px;
+    position: relative;
+}
+
+.message.bot::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    bottom: 8px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 8px 8px 0;
+    border-color: transparent #ffffff transparent transparent;
+}
+
+.message.you {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-bottom-right-radius: 8px;
+    margin-left: auto;
+    position: relative;
+}
+
+.message.you::before {
+    content: '';
+    position: absolute;
+    right: -8px;
+    bottom: 8px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 0 8px 8px;
+    border-color: transparent transparent #764ba2 transparent;
+}
+
+/* Typing indicator */
+.message.bot.typing::after {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #cbd5e0;
+    animation: typing 1.4s infinite ease-in-out;
+    margin-left: 4px;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.5;
+    }
+    30% {
+        transform: translateY(-10px);
+        opacity: 1;
+    }
+}
+
+#options {
+    padding: 15px 20px;
+    background: linear-gradient(to bottom, #ffffff, #f8f9fb);
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    min-height: 60px;
+    align-items: center;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.option-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+.option-btn.selected {
+    background-color: #2e86de;
+    color: white;
+    border: 2px solid #1b4f72;
+}
+
+.option-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+.option-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #5a67d8, #6b46c1);
+}
+
+.option-btn:hover::before {
+    width: 100%;
+    height: 100%;
+}
+
+.option-btn:active {
+    transform: translateY(-1px) scale(1.02);
+    transition: transform 0.1s ease;
+}
+
+#resumeLink {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #f0fff4, #e6fffa);
+    border-top: 1px solid #9ae6b4;
+    text-align: center;
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+#resumeLink a {
+    color: #38a169;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 8px 16px;
+    border: 2px solid #38a169;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+#resumeLink a:hover {
+    background: #38a169;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(56, 161, 105, 0.3);
+}
+
+/* Input section - Fixed positioning to prevent overlap */
+#resumeInput {
+    position: absolute;
+    left: 20px;
+    bottom: 80px;
+    width: auto;
+    padding: 10px 12px;
+    border: 2px dashed #cbd5e0;
+    border-radius: 8px;
+    font-size: 12px;
+    background: #f8f9fb;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 5;
+    font-family: inherit;
+}
+
+#resumeInput:hover {
+    border-color: #667eea;
+    background: #edf2f7;
+    transform: translateY(-1px);
+}
+
+#resumeInput:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+#inputMessage {
+    position: absolute;
+    left: 80px;
+    right: 20px;
+    bottom: 20px;
+    border: 2px solid #e2e8f0;
+    border-radius: 25px;
+    padding: 12px 20px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s ease;
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 5;
+}
+
+#inputMessage:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1), 0 4px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+#send_btn {
+    position: absolute;
+    right: 0px;
+    bottom: 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    width: 70px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    overflow: hidden;
+    position: relative;
+    z-index: 6;
+}
+
+#send_btn::before {
+    content: "";
+    transition: transform 0.3s ease;
+}
+
+#send_btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+}
+
+#send_btn:hover::before {
+    transform: translateX(2px);
+}
+
+#send_btn:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+}
+
+/* Add bottom padding to container to make space for file input */
+#messages {
+    flex: 1;
+    padding: 75px 20px 90px 20px;
+    overflow-y: auto;
+    background: linear-gradient(to bottom, #f8f9fb, #ffffff);
+    scroll-behavior: smooth;
+    position: relative;
+}
+
+#options {
+    padding: 15px 20px 15px 20px;
+    background: linear-gradient(to bottom, #ffffff, #f8f9fb);
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    min-height: 60px;
+    align-items: center;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    margin-bottom: 70px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+    .container {
+        width: 95vw;
+        height: 100vh;
+        border-radius: 0;
+        margin: 0;
+    }
+    
+    #messages {
+        padding: 70px 15px 15px 15px;
+    }
+    
+    .message {
+        max-width: 200px;
+        font-size: 13px;
+    }
+    
+    .input-section {
+        padding: 12px 15px;
+    }
+}
+
+/* Loading animation for when bot is thinking */
+.bot-typing {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f1f5f9;
+    border-radius: 18px;
+    border-bottom-left-radius: 4px;
+    margin-bottom: 15px;
+    animation: messageSlide 0.3s ease-out;
+}
+
+.typing-dots {
+    display: flex;
+    gap: 3px;
+}
+
+.typing-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #94a3b8;
+    animation: typingDots 1.4s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(1) { animation-delay: 0s; }
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingDots {
+    0%, 60%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    30% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+}
+
+/* Success/Error states */
+.message.success {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    color: white;
+}
+
+.message.error {
+    background: linear-gradient(135deg, #f56565, #e53e3e);
+    color: white;
+}
+
+/* Online indicator */
+.container::after {
+    content: "● Online";
+    position: absolute;
+    top: 12px;
+    right: 20px;
+    color: #48bb78;
+    font-size: 12px;
+    font-weight: 500;
+    z-index: 11;
+}

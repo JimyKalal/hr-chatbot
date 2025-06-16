@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat-Bot</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+    <div class="container">
+        <!-- <img src="\public\robot-chat-bot-concept-illustration-vector.jpg" id="bot-img" alt=""> -->
+        <div id="messages"></div>
+        <div id="resumeLink"></div> 
+        <div id="options"></div>
+          <input type="file" id="resumeInput" accept=".pdf">
+        <input type="text" id="inputMessage" placeholder="Type a message" />
+       <button id="send_btn">Send</button>
+
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/client.js" defer></script>
+</body>
+</html>
