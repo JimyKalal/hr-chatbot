@@ -1,6 +1,7 @@
 const User = require('../models/userDetails');
 const fs = require('fs');
 const path = require('path');
+const nodemailer = require('nodemailer')
 
 const handleUserMsg = async (socket, msg) => {
     let user = await User.findOne({ socketId: socket.id });
@@ -16,7 +17,7 @@ const handleUserMsg = async (socket, msg) => {
             user.introShown = true;
             user.currentStep = 'graduation';
             await user.save();
-            
+
             socket.emit('bot-message', 'What is your graduation?');
             socket.emit('bot-options', ['B-tech', 'B.Sc', 'M-tech']);
         } else if (msg.toLowerCase() === 'no') {
@@ -124,6 +125,10 @@ const handleUserMsg = async (socket, msg) => {
 
             socket.emit('bot-message', `Resume uploaded! View: ${user.resumeURL}`);
             socket.emit('bot-message', 'Thank you! We will email you regarding our job response.');
+
+
+            sendMail('meetgajjar1010@gmail.com')
+            // socket.emit('send-email', 'meetgajjar1010@gmail.com')
         } else {
             socket.emit('bot-message', 'Invalid format. Upload a valid PDF (base64).');
         }
@@ -135,5 +140,46 @@ const handleUserMsg = async (socket, msg) => {
         return;
     }
 };
+
+
+
+
+const sendMail = async (data) => {
+    console.log(sendMail);
+
+    const transport = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL,
+            pass: process.env.EMAIL_PASSWORD,
+        },
+    });
+
+    try {
+
+        const info = await transport.sendMail({
+            from: " Hr-bot",
+            to: data,
+            subject: 'Thank you for applying application',
+            text: `Hello [Candidate Name],
+
+Thank you for applying for the [Job Title] position at [Your Company Name]! 🤝
+We’ve received your application and our team is reviewing it.
+
+If shortlisted, we’ll get in touch soon with the next steps.
+For updates, just reply to this email or type status in the chat.
+
+Best of luck!
+– HR_Bot`
+        })
+        console.log(info);
+
+        return null;
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
 
 module.exports = { handleUserMsg };

@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-
     const socket = io();
 
     const sendBtn = document.getElementById('send_btn');
@@ -7,6 +6,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const optionsContainer = document.getElementById('options');
     const messagesContainer = document.getElementById('messages');
     const resumeInput = document.getElementById('resumeInput');
+    const resumeLinkDiv = document.getElementById('resumeLink');
+    const fileNameSpan = document.getElementById('fileName');
 
     function appendMessage(sender, text) {
         const messageWrapper = document.createElement('div');
@@ -30,13 +31,13 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderOptions(options) {
         optionsContainer.innerHTML = '';
 
-         const skillKeywords = ['HTML', 'CSS', 'JavaScript', 'node-js', 'express-js', 'mongoDB', 'ejs'];
+        const skillKeywords = ['HTML', 'CSS', 'JavaScript', 'node-js', 'express-js', 'mongoDB', 'ejs'];
         const isSkillSelection = skillKeywords.every(skill => options.includes(skill));
 
         if (isSkillSelection) {
             const selectedSkills = new Set();
 
-            for(const option of options) {
+            for (const option of options) {
                 const btn = document.createElement('button');
                 btn.innerText = option;
                 btn.classList.add('option-btn');
@@ -52,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
 
                 optionsContainer.appendChild(btn);
-            };
+            }
 
             const submitBtn = document.createElement('button');
             submitBtn.innerText = 'Submit Skills';
@@ -73,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
             optionsContainer.appendChild(submitBtn);
 
         } else {
-            for(const option of options) {
+            for (const option of options) {
                 const btn = document.createElement('button');
                 btn.innerText = option;
                 btn.classList.add('option-btn');
@@ -85,12 +86,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 };
 
                 optionsContainer.appendChild(btn);
-            };
+            }
         }
     }
 
     resumeInput.addEventListener('change', () => {
         const file = resumeInput.files[0];
+
+        // Show file name
+        if (file) {
+            fileNameSpan.textContent = file.name;
+        } else {
+            fileNameSpan.textContent = 'No file chosen';
+        }
 
         if (!file || file.type !== 'application/pdf') {
             alert('Please upload a valid PDF file!');
@@ -118,13 +126,22 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.on('bot-message', (msg) => {
         appendMessage('Bot', msg);
 
-        if (msg.toLowerCase().includes('your resume has been uploaded!')) {
+        // Show resume input
+        if (msg.toLowerCase().includes('please upload your resume')) {
+            document.getElementById('resumeUploadSection').style.display = 'block';
+            resumeInput.style.display = 'block';
+        } else {
+            document.getElementById('resumeUploadSection').style.display = 'none';
+            resumeInput.style.display = 'none';
+        }
+
+        // Show resume link if uploaded
+        if (msg.toLowerCase().includes('resume uploaded!')) {
+            const url = msg.split('View: ')[1];
             const link = document.createElement('a');
-            link.href = msg.split('View here: ')[1];
+            link.href = url;
             link.innerText = 'View uploaded Resume!';
             link.target = '_blank';
-
-            const resumeLinkDiv = document.getElementById('resumeLink');
             resumeLinkDiv.innerHTML = '';
             resumeLinkDiv.appendChild(link);
         }
@@ -133,5 +150,4 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.on('bot-options', (options) => {
         renderOptions(options);
     });
-
 });
