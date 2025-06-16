@@ -9,13 +9,19 @@
 <body>
 
     <div class="container">
-        <!-- <img src="\public\robot-chat-bot-concept-illustration-vector.jpg" id="bot-img" alt=""> -->
         <div id="messages"></div>
         <div id="resumeLink"></div> 
         <div id="options"></div>
-          <input type="file" id="resumeInput" accept=".pdf">
-        <input type="text" id="inputMessage" placeholder="Type a message" />
-       <button id="send_btn">Send</button>
+        <div id="resumeUploadSection" style="display: none; margin-top: 10px;">
+            <label for="resumeInput" class="resume-label">Upload your resume (PDF only):</label>
+            <input type="file" id="resumeInput" accept=".pdf" />
+            <p id="fileName" style="font-size: 14px; color: #333; margin-top: 5px;">No file chosen</p>
+        </div>
+         <div class="input-area">
+            <input type="text" id="inputMessage" placeholder="Type a message" />
+            <button id="send_btn">Send</button>
+        </div>
+      
 
     </div>
 
