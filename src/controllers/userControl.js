@@ -128,7 +128,7 @@ const handleUserMsg = async (socket, msg) => {
 
 
             sendMail('meetgajjar1010@gmail.com')
-            // socket.emit('send-email', 'meetgajjar1010@gmail.com')
+            // socket.emit('send-email', '')
         } else {
             socket.emit('bot-message', 'Invalid format. Upload a valid PDF (base64).');
         }
