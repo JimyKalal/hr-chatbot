@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - HR Chatbot</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .form-box {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #ccc;
+            width: 350px;
+        }
+
+        input,
+        select,
+        button {
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 10px;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        p {
+            text-align: center;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-box">
+        <h2>Login</h2>
+        <form action="/auth/login" method="POST">
+
+
+
+            <input type="email" id="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+
+            <select name="role" id="role" required>
+                <option value="">login as..</option>
+                <option value="user">User</option>
+                <option value="hr">Hr</option>
+            </select>
+
+            <button type="submit">Login</button>
+
+            <p>Don't have account? <a href="/register">Resgister</a></p>
+        </form>
+    </div>
+
+</body>
+
+</html>

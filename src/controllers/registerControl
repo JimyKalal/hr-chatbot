@@ -1,0 +1,44 @@
+const bcrypt = require('bcryptjs');
+const User = require('../models/userDetails');
+const { generateToken } = require('../utils/jwt');
+
+const register = async (req, res) => {
+    const { email, password, role } = req.body;
+
+    try {
+        const existingUser = await User.findOne({ email });
+
+        // 🔁 If user already exists, redirect to login page
+        if (existingUser) {
+            return res.redirect('/login');
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = new User({
+            email,
+            password: hashedPassword,
+            role
+        });
+        await newUser.save();
+
+        const token = generateToken({ id: newUser._id, role: newUser.role });
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            maxAge: 24 * 60 * 60 * 1000,
+        });
+
+        if (role === 'hr') {
+            res.redirect('/dashboard');
+        } else {
+            res.redirect('/chatbot');
+        }
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send('Server error');
+    }
+};
+
+module.exports = register;
