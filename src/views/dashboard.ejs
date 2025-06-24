@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+          body {
+            font-family: sans-serif;
+            background: #f4f6f9;
+            padding: 40px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            margin-top: 30px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <h1>HR Dashboard</h1>
+    <table>
+        <thead>
+            <tr>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Graduation</th>
+            <th>Domain</th>
+            <th>Skills</th>
+            <th>Experience</th>
+            <th>Expected Package</th>
+            <th>Resume</th>
+            </tr>
+        </thead>
+        <tbody id="userTable">
+
+        </tbody>
+    </table>
+
+    <script>
+        fetch('/api/hr/dashboard',{
+            headers: {
+                authorization: `Bearer ${localStorage.getItem('token')}`
+
+            }
+        })
+        .then(res => res.json())
+        .then(data =>{
+            const table = document.getElementById('userTable');
+            if(Array.isArray(data)){
+                for(let user of data){
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = ` 
+                     <td>${user.email}</td>
+                    <td>${user.role}</td>
+                    <td>${user.graduation || '-'}</td>
+                    <td>${user.domain || '-'}</td>
+                    <td>${(user.skills || []).join(', ')}</td>
+                    <td>${user.experience || '-'}</td>
+                    <td>${user.expectedPackage || '-'}</td>
+                    <td>
+                        ${user.resumeURL ? `<a href="${user.resumeURL}" target="_blank">View</a>` : 'Not uploaded'}
+                    </td>`;
+                    table.appendChild(tr);
+                }
+            }
+            else{
+                     table.innerHTML = `<tr><td colspan="8">No users found</td></tr>`;
+            }
+            
+        })
+        .catch(err =>{
+            console.error(err);
+            alert('failed to load users');
+        })
+    </script>
+</body>
+</html>
