@@ -110,7 +110,7 @@ body {
     border-radius: 18px;
     font-size: 14px;
     line-height: 1.4;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(231, 236, 232, 0.769);
     transition: transform 0.2s ease;
 }
 
