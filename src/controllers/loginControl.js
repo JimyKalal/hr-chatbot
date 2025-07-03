@@ -1,8 +1,9 @@
+//src\controllers\loginControl.js
 const bcrypt = require('bcryptjs');
 const User = require('../models/userDetails');
 const { generateToken } = require('../utils/jwt');
 
-const login = async (req, res) => {
+exports.login = async (req, res) => {
     const { email, password, role } = req.body;
 
     try {
@@ -32,4 +33,4 @@ const login = async (req, res) => {
     }
 };
 
-module.exports = login;
+

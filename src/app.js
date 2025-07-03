@@ -7,6 +7,10 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const connectDB = require('./mongoDB/db');
 const { handleUserMsg } = require('./controllers/userControl');
+const dashboardController = require('./controllers/dashboardControl');
+//src\controllers\dashboardControl.js
+const dashboardRoutes = require('./router/dashBoardRoute');
+//src\router\dashBoardRoute.js
 const authMiddleware = require('./middleware/auth');
 const authRoutes = require('./router/authRoute');
 const User = require('./models/userDetails');
@@ -26,11 +30,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // --- ROUTES ---
 app.use('/auth', authRoutes);
+app.use('/', dashboardRoutes);
+
 app.get('/', (req, res) => res.redirect('/login'));
 app.get('/login', (req, res) => res.render('login'));
 app.get('/register', (req, res) => res.render('register'));
 app.get('/chatbot', authMiddleware, (req, res) => res.render('chatbot'));
-app.get('/dashboard', authMiddleware, (req, res) => res.render('dashboard'));
+app.get('/dashboard', authMiddleware, dashboardController.showDashboard);
+app.get('/dashboard', authMiddleware, (req, res) => res.redirect('/api/hr/dashboard'));
+
+// app.get('/dashboard', authMiddleware, (req, res) => res.render('dashboard'));
 
 // --- SOCKET.IO SETUP ---
 const server = http.createServer(app);
