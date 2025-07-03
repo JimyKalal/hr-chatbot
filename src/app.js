@@ -8,9 +8,7 @@ const cookieParser = require('cookie-parser');
 const connectDB = require('./mongoDB/db');
 const { handleUserMsg } = require('./controllers/userControl');
 const dashboardController = require('./controllers/dashboardControl');
-//src\controllers\dashboardControl.js
 const dashboardRoutes = require('./router/dashBoardRoute');
-//src\router\dashBoardRoute.js
 const authMiddleware = require('./middleware/auth');
 const authRoutes = require('./router/authRoute');
 const User = require('./models/userDetails');
@@ -39,8 +37,6 @@ app.get('/chatbot', authMiddleware, (req, res) => res.render('chatbot'));
 app.get('/dashboard', authMiddleware, dashboardController.showDashboard);
 app.get('/dashboard', authMiddleware, (req, res) => res.redirect('/api/hr/dashboard'));
 
-// app.get('/dashboard', authMiddleware, (req, res) => res.render('dashboard'));
-
 // --- SOCKET.IO SETUP ---
 const server = http.createServer(app);
 const io = socketIo(server);
@@ -48,7 +44,6 @@ const io = socketIo(server);
 io.on('connection', async (socket) => {
   console.log('🌐 Client connected:', socket.id);
 
-  // Extract JWT from cookies
   const cookieStr = socket.handshake.headers.cookie;
   const token = cookieStr
     ?.split('; ')
@@ -63,13 +58,16 @@ io.on('connection', async (socket) => {
         user.socketId = socket.id;
         await user.save();
         console.log('✅ socketId saved for:', user.email);
+
+        // ✅ Greet immediately after login/register
+        handleUserMsg(socket, '__init__');
       }
     } catch (err) {
       console.error('⚠️ JWT error in socket connection:', err.message);
     }
   }
 
-  // Single user-message listener
+  // ✅ Main chatbot communication
   socket.on('user-message', (msg) => {
     console.log('📩 Received message:', msg);
     handleUserMsg(socket, msg);
