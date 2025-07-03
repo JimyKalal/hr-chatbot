@@ -138,7 +138,7 @@ console.log(user.currentStep, user.introShown);
       socket.emit('bot-message', `Resume uploaded! View: ${user.resumeURL}`);
       socket.emit('bot-message', 'Thank you! We will email you regarding our job response.');
 
-      sendMail('meetgajjar1010@gmail.com'); // Ensure correct email
+      sendMail('jimmykalal27@gmail.com'); // Ensure correct email
     } else {
       socket.emit('bot-message', 'Upload a valid PDF (base64) file.');
     }
