@@ -6,47 +6,112 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - HR Chatbot</title>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
-            font-family: sans-serif;
-            background: #f4f6f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #121212;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            color: #e0e0e0;
         }
 
         .form-box {
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px #ccc;
-            width: 350px;
+            background: #1e1e1e;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            width: 380px;
+            border: 1px solid #2d2d2d;
+        }
+
+        h2 {
+            color: #4a8cff;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            color: #aaa;
         }
 
         input,
-        select,
-        button {
-            display: block;
+        select {
             width: 100%;
-            margin-bottom: 15px;
-            padding: 10px;
+            padding: 12px 15px;
             font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background-color: #252525;
+            color: #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #4a8cff;
+            box-shadow: 0 0 0 2px rgba(74, 140, 255, 0.2);
+        }
+
+        input::placeholder {
+            color: #777;
         }
 
         button {
-            background-color: #007bff;
+            width: 100%;
+            background-color: #4a8cff;
             color: white;
             border: none;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
             cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
         }
 
-        p {
+        button:hover {
+            background-color: #3a7ce8;
+        }
+
+        .footer-text {
             text-align: center;
+            margin-top: 20px;
+            color: #aaa;
+            font-size: 0.95rem;
         }
 
         a {
-            color: #007bff;
+            color: #4a8cff;
             text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        a:hover {
+            color: #3a7ce8;
+            text-decoration: underline;
+        }
+
+        select option {
+            background-color: #252525;
+            color: #e0e0e0;
         }
     </style>
 </head>
@@ -55,24 +120,29 @@
     <div class="form-box">
         <h2>Login</h2>
         <form action="/auth/login" method="POST">
-
-
-
-            <input type="email" id="email" name="email" placeholder="Email" required>
-            <input type="password" name="password" placeholder="Password" required>
-
-            <select name="role" id="role" required>
-                <option value="">login as..</option>
-                <option value="user">User</option>
-                <option value="hr">Hr</option>
-            </select>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="role">Login as</label>
+                <select name="role" id="role" required>
+                    <option value="">Select role</option>
+                    <option value="user">User</option>
+                    <option value="hr">HR</option>
+                </select>
+            </div>
 
             <button type="submit">Login</button>
 
-            <p>Don't have account? <a href="/register">Resgister</a></p>
+            <p class="footer-text">Don't have an account? <a href="/register">Register</a></p>
         </form>
     </div>
-
 </body>
-
 </html>

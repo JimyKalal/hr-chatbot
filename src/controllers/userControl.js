@@ -3,97 +3,119 @@ const fs = require('fs');
 const path = require('path');
 const nodemailer = require('nodemailer');
 
-const handleUserMsg = async (socket, msg) => {
-  console.log("User Message:", msg);
-  
-  let user = await User.findOne({ socketId: socket.id });
+const userStates = {}; // To track user progress during session
 
+const handleUserMsg = async (socket, msg) => {
+  const socketId = socket.id;
+
+  let user = await User.findOne({ socketId: socketId });
   if (!user) {
-     console.log('⚠️ No user found for socket:', socket.id);
-    socket.emit('bot-message', 'Session expired or user not recognized. Please log in again.');
+    socket.emit('bot-message', '⚠️ Session expired or user not recognized. Please log in again.');
     return;
   }
-console.log(user.currentStep, user.introShown);
-  
-  if (user.currentStep === 'intro') {
-    if (!user.introShown) {
-      user.introShown = true;
-      await user.save();
-      socket.emit('bot-message', 'Hello! Want to apply for a job?');
+
+  if (!userStates[socketId]) {
+    userStates[socketId] = {
+      introShown: false,
+      stage: 'intro',
+    };
+  }
+
+  const state = userStates[socketId];
+
+  // Prevent message after resume is submitted
+  if (state.stage === 'done' && msg !== '__init__') {
+    socket.emit('bot-message', '✅ Your application has already been submitted. You will be updated via email. 📩');
+    return;
+  }
+
+  // Handle greeting when user first lands on chatbot
+  if (msg === '__init__') {
+    const hour = new Date().getHours();
+    let greet = '';
+
+    if (hour < 12) greet = '🌞 Good Morning';
+    else if (hour < 17) greet = '🌤 Good Afternoon';
+    else greet = '🌙 Good Evening';
+
+    socket.emit('bot-message', `${greet}, how can I assist you today? 😊`);
+    state.introShown = false;
+    state.stage = 'intro';
+    return;
+  }
+
+  // STEP 1 - Intro
+  if (state.stage === 'intro') {
+    if (!state.introShown) {
+      socket.emit('bot-message', '👋 Want to apply for a job?');
       socket.emit('bot-options', ['Yes', 'No']);
+      state.introShown = true;
       return;
-    } 
-    else if (msg.toLowerCase() === 'yes') {
-      user.applicationType = 'Yes';
-      user.currentStep = 'graduation';
-      await user.save();
-      socket.emit('bot-message', 'What is your graduation?');
+    }
+
+    if (msg.toLowerCase() === 'yes') {
+      state.stage = 'graduation';
+      socket.emit('bot-message', '🎓 What is your graduation?');
       socket.emit('bot-options', ['B-tech', 'B.Sc', 'M-tech']);
       return;
-    } 
-    else if (msg.toLowerCase() === 'no') {
-      user.applicationType = 'No';
-      user.currentStep = 'done';
-      await user.save();
-      socket.emit('bot-message', 'No worries! Have a great day!');
+    } else if (msg.toLowerCase() === 'no') {
+      state.stage = 'done';
+      socket.emit('bot-message', '👍 No worries! Have a great day!');
       return;
-    } 
-    else {
+    } else {
       socket.emit('bot-message', 'Please choose Yes or No to continue.');
       socket.emit('bot-options', ['Yes', 'No']);
       return;
     }
   }
 
-  
-  else if (user.currentStep === 'graduation') {
+  // STEP 2 - Graduation
+  else if (state.stage === 'graduation') {
     user.graduation = msg;
-    user.currentStep = 'domain';
     await user.save();
-      console.log('👍 Moved to domain step');
-    socket.emit('bot-message', 'Choose your Domain.');
+    state.stage = 'domain';
+    socket.emit('bot-message', '🧭 Choose your domain.');
     socket.emit('bot-options', ['Web-Development', 'AI/ML', 'Data-science', 'Cloud Computing', 'Quality-assessment']);
     return;
   }
 
-  
-  else if (user.currentStep === 'domain') {
+  // STEP 3 - Domain
+  else if (state.stage === 'domain') {
     user.domain = msg;
-    user.currentStep = 'skills';
     await user.save();
-    socket.emit('bot-message', 'Select your skills (multiple, comma-separated)');
+    state.stage = 'skills';
+    socket.emit('bot-message', '💡 Select your skills (comma-separated)');
     socket.emit('bot-options', ['HTML', 'CSS', 'JavaScript', 'node-js', 'express-js', 'mongoDB', 'ejs']);
     return;
   }
 
-  
-  else if (user.currentStep === 'skills') {
-    const known = ['HTML', 'CSS', 'JavaScript', 'node-js', 'express-js', 'mongoDB', 'ejs'];
-    if (msg.includes(',') && known.some(k => msg.includes(k))) {
-      user.skills = msg.split(',').map(s => s.trim());
-      user.currentStep = 'experience';
+  // STEP 4 - Skills
+  else if (state.stage === 'skills') {
+    const knownSkills = ['HTML', 'CSS', 'JavaScript', 'node-js', 'express-js', 'mongoDB', 'ejs'];
+    if (msg.includes(',') && knownSkills.some(skill => msg.includes(skill))) {
+      user.skills = msg.split(',').map(skill => skill.trim());
       await user.save();
-      socket.emit('bot-message', 'Do you have any prior experience?');
+      state.stage = 'experience';
+      socket.emit('bot-message', '💼 Do you have any prior experience?');
       socket.emit('bot-options', ['Yes', 'No']);
     } else {
-      socket.emit('bot-message', 'Please enter at least one skill, comma-separated.');
-      socket.emit('bot-options', known);
+      socket.emit('bot-message', '⚠️ Please enter at least one skill (comma-separated).');
+      socket.emit('bot-options', knownSkills);
     }
     return;
   }
 
-  
-  else if (user.currentStep === 'experience') {
+  // STEP 5 - Experience Yes/No
+  else if (state.stage === 'experience') {
     if (msg.toLowerCase() === 'yes') {
-      user.currentStep = 'experienceValue';
-      await user.save();
-      socket.emit('bot-message', 'How much experience do you have?');
+      state.stage = 'experienceValue';
+      socket.emit('bot-message', '⏳ How much experience do you have?');
       socket.emit('bot-options', ['< 2 years', '2 to 5 years', '> 5 years']);
     } else if (msg.toLowerCase() === 'no') {
       user.experience = 'No';
-      user.currentStep = 'package';
       await user.save();
-      socket.emit('bot-message', 'What is your expected package?');
+      state.stage = 'package';
+      socket.emit('bot-message', '💰 What is your expected package?');
       socket.emit('bot-options', ['2 LPA', '3 LPA', '4 LPA', '5 LPA', '6+ LPA']);
     } else {
       socket.emit('bot-message', 'Please choose Yes or No.');
@@ -102,97 +124,98 @@ console.log(user.currentStep, user.introShown);
     return;
   }
 
-  
-  else if (user.currentStep === 'experienceValue') {
-    const options = ['< 2 years', '2 to 5 years', '> 5 years'];
-    if (options.includes(msg.trim())) {
+  // STEP 6 - Experience Value
+  else if (state.stage === 'experienceValue') {
+    const valid = ['< 2 years', '2 to 5 years', '> 5 years'];
+    if (valid.includes(msg.trim())) {
       user.experience = msg;
-      user.currentStep = 'package';
       await user.save();
-      socket.emit('bot-message', 'What is your expected package?');
+      state.stage = 'package';
+      socket.emit('bot-message', '💰 What is your expected package?');
       socket.emit('bot-options', ['2 LPA', '3 LPA', '4 LPA', '5 LPA', '6+ LPA']);
     } else {
-      socket.emit('bot-message', 'Select one of the given experience options.');
-      socket.emit('bot-options', options);
+      socket.emit('bot-message', '⚠️ Select one of the given experience options.');
+      socket.emit('bot-options', valid);
     }
     return;
   }
 
-  else if (user.currentStep === 'package') {
+  // STEP 7 - Package
+  else if (state.stage === 'package') {
     user.expectedPackage = msg;
-    user.currentStep = 'resume';
     await user.save();
-    socket.emit('bot-message', 'Please upload your resume as a base64-encoded PDF.');
+    state.stage = 'resume';
+    socket.emit('bot-message', '📎 Please upload your resume as a base64 PDF.');
     return;
   }
 
-  else if (user.currentStep === 'resume') {
+  // STEP 8 - Resume Upload
+  else if (state.stage === 'resume') {
     if (msg.startsWith('data:application/pdf;base64,')) {
       const base64Data = msg.split(',')[1];
-      const filePath = path.join(__dirname, `../uploads/resume_${user._id}.pdf`);
+      const filePath = path.join(__dirname, `../uploads/${socketId}_resume.pdf`);
       fs.writeFileSync(filePath, base64Data, 'base64');
 
-      user.resumeURL = `/uploads/resume_${user._id}.pdf`;
-      user.currentStep = 'done';
+      const fileUrl = `/uploads/${socketId}_resume.pdf`;
+      user.resumeURL = fileUrl;
       await user.save();
-      socket.emit('bot-message', `Resume uploaded! View: ${user.resumeURL}`);
-      socket.emit('bot-message', 'Thank you! We will email you regarding our job response.');
+      state.stage = 'done';
 
-      sendMail('jimmykalal27@gmail.com'); // Ensure correct email
+      socket.emit('bot-message', `✅ Resume uploaded successfully! 📝\n🔗 [View Resume](${fileUrl})`);
+
+      setTimeout(() => {
+        socket.emit('bot-message', '🎉 Thank you for applying! We’ll review your resume and get back to you via email. 📬');
+      }, 1000);
+
+      sendMail(user.email);
     } else {
-      socket.emit('bot-message', 'Upload a valid PDF (base64) file.');
+      socket.emit('bot-message', '⚠️ Upload a valid PDF file in base64 format.');
     }
     return;
   }
 
+  // If process is already done
   else {
-    socket.emit('bot-message', 'Session complete. Thank you again!');
-    return;
+    socket.emit('bot-message', '✅ Your application has already been submitted.');
   }
 };
 
-
 module.exports = { handleUserMsg };
 
 
+// ----------------------------
+// ✉️ Email Sending Function
+const sendMail = async (recipientEmail) => {
+  console.log('📧 Sending mail to:', recipientEmail);
 
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.EMAIL_PASSWORD,
+    },
+  });
 
-const sendMail = async (data) => {
-    console.log(sendMail);
+  try {
+    const info = await transporter.sendMail({
+      from: '"HR Bot 🤖" <' + process.env.EMAIL + '>',
+      to: recipientEmail,
+      subject: 'Thank you for applying for a job 🙌',
+      text: `Hello ${recipientEmail},
 
-    const transport = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.EMAIL,
-            pass: process.env.EMAIL_PASSWORD,
-        },
-    });
+Thank you for applying for the position at our company.
 
-    try {
-
-        const info = await transport.sendMail({
-            from: " Hr-bot",
-            to: data,
-            subject: 'Thank you for applying for a job.',
-            text: `Hello [Candidate Name],
-
-Thank you for applying for the position at our Company  
-We’ve received your application and our team is reviewing it.
+📄 We’ve received your application and our team is reviewing it.
 
 If shortlisted, we’ll get in touch soon with the next steps.
-For updates, just reply to this email or type status in the chat.
+For updates, just reply to this email or type "status" in the chat.
 
-Best of luck!
-– HR_Bot`
-        })
-        console.log(info);
+Best of luck! 🍀
+– HR_Bot 🤖`
+    });
 
-        return null;
-    } catch (error) {
-        console.error(error);
-    }
-
-}
-
-
-module.exports = { handleUserMsg };
+    console.log('✅ Email sent:', info.messageId);
+  } catch (error) {
+    console.error('❌ Error sending email:', error);
+  }
+};

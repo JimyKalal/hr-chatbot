@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const socket = io();
+    socket.emit('user-message', '__init__');
+
 
     const sendBtn = document.getElementById('send_btn');
     const messageInput = document.getElementById('inputMessage');
