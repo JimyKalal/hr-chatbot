@@ -37,7 +37,7 @@ exports.register = async (req, res) => {
         }
 
     } catch (error) {
-        console.error(error);
+        console.error('register err',error.msg);
         return res.status(500).send('Server error');
     }
 };
