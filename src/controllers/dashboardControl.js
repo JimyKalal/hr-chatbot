@@ -16,3 +16,24 @@ exports.showDashboard = async (req, res) => {
     res.status(500).send('Server error');
   }
 };
+exports.deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) return res.status(404).send("User not found");
+
+    // Optional: Delete resume file from uploads
+    const fs = require('fs');
+    const path = require('path');
+    if (user.resumeURL) {
+      const resumePath = path.join(__dirname, '..', user.resumeURL);
+      if (fs.existsSync(resumePath)) fs.unlinkSync(resumePath);
+    }
+
+    await user.deleteOne();
+    res.redirect('/dashboard');
+  } catch (err) {
+    console.error('❌ Error deleting user:', err);
+    res.status(500).send('Server error');
+  }
+};

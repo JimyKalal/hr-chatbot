@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const dashboardController = require('../controllers/dashboardControl');
-const auth = require('../middleware/auth');
+const authMiddleware = require('../middleware/auth');
 
-router.get('/dashboard', auth, dashboardController.showDashboard);
+// Existing routes...
+router.get('/dashboard', authMiddleware, dashboardController.showDashboard);
 
+// New DELETE route
+router.post('/dashboard/delete/:id', authMiddleware, dashboardController.deleteUser);
 
 module.exports = router;
