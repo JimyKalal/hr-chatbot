@@ -22,9 +22,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname,'..', 'views'));
-app.use('/uploads', express.static(path.join(__dirname,'..', 'uploads')));
-app.use(express.static(path.join(__dirname, '..','public')));
+app.set('views', path.resolve(__dirname, 'views'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // --- ROUTES ---
 app.use('/auth', authRoutes);
