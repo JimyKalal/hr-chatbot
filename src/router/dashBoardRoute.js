@@ -6,7 +6,7 @@ const authMiddleware = require('../middleware/auth');
 // Existing routes...
 router.get('/dashboard', authMiddleware, dashboardController.showDashboard);
 
-// New DELETE route
+
 router.post('/dashboard/delete/:id', authMiddleware, dashboardController.deleteUser);
 
 module.exports = router;

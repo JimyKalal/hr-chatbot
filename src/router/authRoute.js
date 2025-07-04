@@ -7,6 +7,3 @@ router.post('/login',loginControl.login);
 router.post('/register',registerControl.register);
 
 module.exports = router;
-
-
-//src\controllers\loginControl.js
