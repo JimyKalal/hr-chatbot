@@ -1,4 +1,3 @@
-
 const bcrypt = require('bcryptjs');
 const User = require('../models/userDetails');
 const { generateToken } = require('../utils/jwt');
@@ -23,25 +22,24 @@ exports.register = async (req, res) => {
         });
         await newUser.save();
 
+
+        console.log('JWT_SECRET in register:', process.env.JWT_SECRET);
+
         const token = generateToken({ id: newUser._id, role: newUser.role });
 
         res.cookie('token', token, {
             httpOnly: true,
-            maxAge: 24 * 60 * 60 * 1000,
+            maxAge: 24 * 60 * 60 * 1000, // 1 day
         });
 
         if (role === 'hr') {
-            res.redirect('/dashboard');
+            return res.redirect('/dashboard');
         } else {
-            res.redirect('/chatbot');
+            return res.redirect('/chatbot');
         }
 
     } catch (error) {
-        console.error('register err',error.msg);
-        return res.status(500).send('Server error');
+        console.error('❌ Register Error:', error);
+        return res.status(500).send('Server error during registration');
     }
 };
-
-
-
-
